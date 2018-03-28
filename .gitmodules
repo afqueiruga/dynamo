@@ -1,0 +1,6 @@
+[submodule "src/afqsfenicsutil"]
+	path = src/afqsfenicsutil
+	url = https://github.com/afqueiruga/afqsfenicsutil.git
+[submodule "src/afqsrungekutta"]
+	path = src/afqsrungekutta
+	url = https://github.com/afqueiruga/afqsrungekutta.git
