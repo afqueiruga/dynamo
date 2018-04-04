@@ -1,13 +1,13 @@
 // ###############################
 // characteristic length scale
 // ###############################
-sph_len = 0.1 ;
-far_len = 0.5 ;
+sph_len = 0.2 ;
+far_len = 4.0 ;
 // ###############################
 // dimensions (unit length)
 // ###############################
 r = 1. ;
-l = 3. ;
+l = 8. ;
 // ###############################
 // function construction sphere of radius rho
 // ###############################
@@ -30,20 +30,20 @@ Macro ConstructSphereSurface
     // ###############################
     // circles
     // ###############################
-    circleList01 = {};
-    tmp = newreg; Circle(tmp) = {north, center, east};    circleList01[0] = tmp;
-    tmp = newreg; Circle(tmp) = {east, center, south}; 	  circleList01[1] = tmp;
+    circleList = {};
+    tmp = newreg; Circle(tmp) = {north, center, east};    circleList[0] = tmp;
+    tmp = newreg; Circle(tmp) = {east, center, south}; 	  circleList[1] = tmp;
     // ###############################
     // surfaces (lines)
     // ###############################
-    tmp = newreg; Line Loop(tmp) = {lineList[0], circleList01[0], -lineList[2]};
-    tmp = newreg; Line Loop(tmp) = {lineList[2], circleList01[1], -lineList[1]};
+    tmp = newreg; Line Loop(tmp) = {lineList[0], circleList[0], -lineList[2]};
+    tmp = newreg; Line Loop(tmp) = {lineList[2], circleList[1], -lineList[1]};
     // ###############################
     // surfaces (lines)
     // ###############################
-    tmp = newreg; Line Loop(tmp) = {lineList[0], circleList01[0], -lineList[2]};
+    tmp = newreg; Line Loop(tmp) = {lineList[0], circleList[0], -lineList[2]};
     topSurf = newreg; Plane Surface(topSurf) = {tmp};
-    tmp = newreg; Line Loop(tmp) = {lineList[2], circleList01[1], -lineList[1]};
+    tmp = newreg; Line Loop(tmp) = {lineList[2], circleList[1], -lineList[1]};
     botSurf = newreg; Plane Surface(botSurf) = {tmp};
 Return
 // ###############################
@@ -69,8 +69,8 @@ boxLineE = newreg; Line(boxLineE) = {boxEast, boxSouthEast};
 boxLineF = newreg; Line(boxLineF) = {boxSouthEast, boxSouth};
 boxLineG = newreg; Line(boxLineG) = {boxSouth, south};
 
-boxContourNorth = newreg; Line Loop(boxContourNorth) = {boxLineA, boxLineB, boxLineC, boxLineD, -circleList01[0]};
-boxContourSouth = newreg; Line Loop(boxContourSouth) = {-boxLineD, boxLineE, boxLineF, boxLineG, -circleList01[1]};
+boxContourNorth = newreg; Line Loop(boxContourNorth) = {boxLineA, boxLineB, boxLineC, boxLineD, -circleList[0]};
+boxContourSouth = newreg; Line Loop(boxContourSouth) = {-boxLineD, boxLineE, boxLineF, boxLineG, -circleList[1]};
 
 boxSurf = {};
 boxSurfNorth = newreg; Plane Surface(boxSurfNorth) = {boxContourNorth};
@@ -83,3 +83,40 @@ boxSurf[1] = boxSurfSouth;
 // ###############################
 Physical Surface(1) = {topSurf, botSurf};
 Physical Surface(2) = {boxSurf[]};
+
+// ###############################
+// attractors
+// ###############################
+
+attrLine = newreg;
+Line(tmp) = {north, south};
+
+Field[1] = Attractor;
+Field[1].NNodesByEdge = 100;
+Field[1].EdgesList = {circleList[0], circleList[1]};
+
+/*
+D = 235*c;
+Field[2] = MathEval;
+Field[2].F = Sprintf("sqrt( 0.1*y*y + (%g*x+%g*z+%g)*(%g*x+%g*z+%g))",
+                   s,c,D,s,c,D);
+
+Field[3] = Threshold;
+Field[3].IField = 1;
+Field[3].LcMin = near_res;
+Field[3].LcMax = far_res;
+Field[3].DistMin = 3.0;
+Field[3].DistMax = 55.0;
+*/
+
+
+Field[2] = Threshold;
+Field[2].IField = 1;
+Field[2].LcMin = sph_len;
+Field[2].LcMax = far_len;
+Field[2].DistMin = 0.2 * r ;
+Field[2].DistMax = 1.5 * r;
+
+Background Field = 2;
+
+
