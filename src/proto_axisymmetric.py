@@ -7,8 +7,8 @@ import ufl
 ufl.algorithms.apply_derivatives.CONDITIONAL_WORKAROUND = True
 parameters["form_compiler"]["quadrature_degree"]=3
 
-mesh = Mesh("../cylinderInRectangle.xml")
-cellids = MeshFunctionSizet(mesh,"../cylinderInRectangle_physical_region.xml")
+mesh = Mesh("../meshes/cylinderInRectangle.xml")
+cellids = MeshFunctionSizet(mesh,"../meshes/cylinderInRectangle_physical_region.xml")
 
 dx = dx(subdomain_data=cellids)
 
