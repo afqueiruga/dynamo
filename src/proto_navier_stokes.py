@@ -5,6 +5,7 @@ import afqsrungekutta as rk
 
 # element formulation
 c = mesh.ufl_cell()
+p_deg = 2
 elemV = VectorElement("CG", c, p_deg)
 elemP = FiniteElement("CG", c, p_deg - 1)
 Uh = FunctionSpace(mesh, elemV)
