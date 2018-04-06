@@ -7,8 +7,8 @@ import ufl
 ufl.algorithms.apply_derivatives.CONDITIONAL_WORKAROUND = True
 parameters["form_compiler"]["quadrature_degree"]=3
 
-mesh = Mesh("../meshes/cylinderInRectangle.xml")
-cellids = MeshFunctionSizet(mesh,"../meshes/cylinderInRectangle_physical_region.xml")
+mesh = Mesh("../cylinderInRectangle.xml")
+cellids = MeshFunctionSizet(mesh,"../cylinderInRectangle_physical_region.xml")
 
 boty = mesh.coordinates().min(0)[1]
 topy = mesh.coordinates().max(0)[1]
@@ -37,12 +37,12 @@ tB = as_tensor( (-ta.dx(1), ta.dx(0) + 1/x[0]*ta) )
 # tB = curl(ta) + 1/x[0]*ta*Constant((0,1))
 J = Function(S1)
 
-vz = 0.0
+vz = 1000.0
 Jtheta = 1.0
 # - inner(ta,vz*a.dx(1))*dx(1)
 f_M = inner(ta,Da)*x[0]*dx
 # f_R = -inner(grad(ta),grad(a))*x[0]*dx - ta*grad(a)[0]*dx - inner(ta,Jtheta)*x[0]*dx(3)
-f_R = -inner(tB,B)*x[0]*dx - inner(ta,Jtheta)*x[0]*dx(3)
+f_R = -inner(tB,B)*x[0]*dx - inner(ta,vz*a.dx(0))*dx(1) - inner(ta,Jtheta)*x[0]*dx(3)
 f_K = derivative(f_R,a,Da)
 
 bcs = [
@@ -56,7 +56,7 @@ rkf.maxnewt = 1
 
 # a.interpolate( Expression( "x[0]", degree=1 ) )
 Tnow = 0.0
-Tfinal = 100000.0
+Tfinal = 10000.0
 DeltaT = Tfinal/1000.0
 delta_outp = 0.1*DeltaT
 
