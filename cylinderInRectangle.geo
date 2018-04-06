@@ -2,7 +2,7 @@
 // characteristic length scale
 // ###############################
 sph_len = 0.2 ;
-far_len = 4.0 ;
+far_len = 2.0 ;
 // ###############################
 // dimensions (unit length)
 // ###############################
@@ -84,6 +84,17 @@ boxSurf[1] = boxSurfSouth;
 Physical Surface(1) = {topSurf, botSurf};
 Physical Surface(2) = {boxSurf[]};
 
+//+
+newsurf[] = Extrude {2, 0, 0} {
+  Line{14}; Line{16}; 
+};
+Physical Surface(3) = {newsurf[]};
+newsurff[] = Extrude {10.0, 0, 0} {
+  Line{23}; Line{27}; 
+};
+Physical Surface(4) = {newsurff[]};
+
+
 // ###############################
 // attractors
 // ###############################
@@ -95,21 +106,6 @@ Field[1] = Attractor;
 Field[1].NNodesByEdge = 100;
 Field[1].EdgesList = {circleList[0], circleList[1]};
 
-/*
-D = 235*c;
-Field[2] = MathEval;
-Field[2].F = Sprintf("sqrt( 0.1*y*y + (%g*x+%g*z+%g)*(%g*x+%g*z+%g))",
-                   s,c,D,s,c,D);
-
-Field[3] = Threshold;
-Field[3].IField = 1;
-Field[3].LcMin = near_res;
-Field[3].LcMax = far_res;
-Field[3].DistMin = 3.0;
-Field[3].DistMax = 55.0;
-*/
-
-
 Field[2] = Threshold;
 Field[2].IField = 1;
 Field[2].LcMin = sph_len;
@@ -118,5 +114,3 @@ Field[2].DistMin = 0.2 * r ;
 Field[2].DistMax = 1.5 * r;
 
 Background Field = 2;
-
-
