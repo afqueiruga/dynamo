@@ -2,12 +2,13 @@
 // characteristic length scale
 // ###############################
 sph_len = 0.2 ;
-far_len = 2.0 ;
+far_len = 5.0 ;
 // ###############################
 // dimensions (unit length)
 // ###############################
 r = 1. ;
 l = 8. ;
+h = 50. ;
 // ###############################
 // function construction sphere of radius rho
 // ###############################
@@ -55,11 +56,11 @@ Call ConstructSphereSurface;
 // ###############################
 // create surrounding box
 // ###############################
-boxNorth = newp; Point(boxNorth) = {0.0, l, 0.0, far_len};
-boxNorthEast = newp; Point(boxNorthEast) = {l, l, 0.0, far_len};
+boxNorth = newp; Point(boxNorth) = {0.0, h, 0.0, far_len};
+boxNorthEast = newp; Point(boxNorthEast) = {l, h, 0.0, far_len};
 boxEast = newp; Point(boxEast) = {l, 0.0, 0.0, far_len};
-boxSouthEast = newp; Point(boxSouthEast) = {l, -l, 0.0, far_len};
-boxSouth = newp; Point(boxSouth) = {0.0, -l, 0.0, far_len};
+boxSouthEast = newp; Point(boxSouthEast) = {l, -h, 0.0, far_len};
+boxSouth = newp; Point(boxSouth) = {0.0, -h, 0.0, far_len};
 
 boxLineA = newreg; Line(boxLineA) = {north, boxNorth};
 boxLineB = newreg; Line(boxLineB) = {boxNorth, boxNorthEast};
@@ -89,7 +90,7 @@ newsurf[] = Extrude {2, 0, 0} {
   Line{14}; Line{16}; 
 };
 Physical Surface(3) = {newsurf[]};
-newsurff[] = Extrude {10.0, 0, 0} {
+newsurff[] = Extrude {50.0, 0, 0} {
   Line{23}; Line{27}; 
 };
 Physical Surface(4) = {newsurff[]};
@@ -111,6 +112,6 @@ Field[2].IField = 1;
 Field[2].LcMin = sph_len;
 Field[2].LcMax = far_len;
 Field[2].DistMin = 0.2 * r ;
-Field[2].DistMax = 1.5 * r;
+Field[2].DistMax = 5.5 * r;
 
 Background Field = 2;
