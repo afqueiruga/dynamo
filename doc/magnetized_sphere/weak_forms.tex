@@ -1,0 +1,140 @@
+\begin{figure}
+	\centering
+	\begin{tikzpicture}[>=stealth]
+		\pgfmathsetmacro\r{2.5}
+		\pgfmathsetmacro\a{3.0}
+		\pgfmathsetmacro\b{2.75}
+		\pgfmathsetmacro\c{7.0}
+		
+%		\node[inner sep=0pt,
+%		anchor=center,
+%		opacity=0.6] at (0,0) {
+%			\includegraphics[width=5cm]{magnitude.png}
+%		};
+%		\node[inner sep=0pt,
+%		anchor=center,
+%		opacity=0.6] at (0,0) {
+%			\includegraphics[width=4.9cm]{streamlines.png}
+%		};
+	
+		\draw[thick] (-\r,0) arc [start angle=180,end angle=360,x radius=\r, y radius=\r/2];
+		\draw[dashed] (-\r,0) arc [start angle=180,end angle=0,x radius=\r, y radius=\r/2];
+		\draw[thick] (0,\r) arc [start angle=90,end angle=270,x radius=\r/2, y radius=\r];
+		\draw[dashed] (0,\r) arc [start angle=90,end angle=-90,x radius=\r/2, y radius=\r];
+		\draw[thick] (0,0) circle (\r);
+		
+		\draw[dashed] (-\a,-\b) rectangle (\c,\b);
+		\draw[fill] (0,0) circle (0.05) node[below right,inner sep=0pt, outer sep = 1pt,text opacity=1, fill opacity=0.5]{$\mathcal{O}$};
+		\draw[->,fill=white] (0,0) to node[pos=0.4,above left,fill=white,inner sep=0pt,text opacity=1, fill opacity=0.5]{$R$} (60:\r);
+		\draw[->] (0,0) to node[pos=0.8,above]{$\infty$} (-\a,.5*\b);
+		
+		\node[anchor=north east, draw, rounded corners, rectangle split, rectangle split parts=2] (vac) at ($(\c,\b)+(-2pt,-2pt)$) {
+			Vakuum $\varOmega_\text{ext.}$
+			\nodepart{second}
+			\begin{minipage}[t!]{\widthof{Vakuum $\varOmega_\text{ext.}$}}
+			\centering $\bm{J}=\bm{0}$ \\ $\bm{M}=\bm{0}$
+			\end{minipage}
+		};
+		\node[anchor=south east, draw, rounded corners, rectangle split, rectangle split parts=2] (mat) at ($(\c,-\b)+(-2pt,2pt)$) {
+			Material $\varOmega_\mathrm{int.}$
+			\nodepart{second}
+			\begin{minipage}[!t]{\widthof{Material $\varOmega_\mathrm{int.}$}}
+			\centering $\bm{J}^\mathrm{f}=\bm{0}$\\ $\bm{M}\neq\bm{0}$
+			\end{minipage}
+		};
+		\draw[fill] (-45:0.8*\r) circle (0.05);
+		\draw (-45:0.8*\r) to[out=0,in=180] (mat.west);
+		\draw[fill] (20:\r) circle (0.05);
+		\draw (20:\r) to[out=0,in=180] (1.5*\r,0) node[right]{$\p\varOmega_\mathrm{int.}$};
+	\end{tikzpicture}
+	\caption{Sketch of the domain and the modell.}
+\end{figure}
+We study the stationary \textsc{Maxwell} equations for a magnetized sphere. The material is an insulator and therefore the homogeneous form of \textsc{Ampère}'s law is applied. In the interior domain~$\bm{\bm{x}}\in\varOmega_{\mathrm{int.}}$ the field equations read:
+\begin{equation}
+\begin{aligned}
+	\nabla\cdot\bm{B}&=0\,, & \nabla\times\bm{\mathfrak{H}}&=\bm{0}\,,
+\end{aligned}
+\end{equation}
+where the free current potential~$\bm{\mathfrak{H}}$ can be expressed by the magnetic field and the magnetization, \ie $\bm{\mathfrak{H}}=\bm{H}-\bm{M}$. It is possible to solve this problem using a scalar as well as a vector potential.
+
+In the vacuous exterior, the magnetic field is also described by the homogeneous and stationary \textsc{Maxwell} system. In this case, a scalar potential can be used in order to determine the magnetic field, d.\,h.\ $\bm{B}=-\nabla \vp$. In this case, the field equations in the exterior can be recasted into the following form:
+\begin{equation}
+\begin{aligned}
+	\laplace \vp&=0\,, & \bm{x}&\in\varOmega_\mathrm{ext.}\,, \qquad&
+	\vp&\sim \mathcal{O}(\nicefrac{1}{\norm{x}})\,, &
+	\norm{\nabla \vp}&\sim \mathcal{O}(\nicefrac{1}{\norm{x}^2})\,, &
+	\norm{\bm{x}}\to \infty\,.
+\end{aligned}
+\end{equation}
+At interface between the interior and the exterior domain, $\varGamma=\varOmega_\mathrm{int.}\cap\varOmega_\mathrm{ext.}$, homogeneous transition conditions hold:
+\begin{equation}\label{eqn:JumpCondition}
+\begin{aligned}
+	\bm{n}\cdot\jump{\bm{B}}&=0\,, &
+	\bm{n}\times\jump{\bm{\mathfrak{H}}}&=\bm{0}\,, &
+	\bm{x}&\in\varGamma\,.
+\end{aligned}
+\end{equation}
+
+\subsection*{Using a vector potential in the interior}
+We can equivalently write the \textsc{Maxwell} equation in the interior in terms of $\bm{B}$ and $\bm{H}$:
+\begin{equation}
+\begin{aligned}
+	\nabla\cdot\bm{B}&=0\,, & 
+	\nabla\times\bm{H}&=\nabla\times\bm{M}\,, &
+	\bm{H}&=\frac{1}{\mu_0}\bm{B}\,.
+\end{aligned}
+\end{equation}
+Introducing a vector potential~$\bm{A}$ with the property $\bm{B}=\nabla\times\mu_0\bm{A}$ gives the differential equation:
+\begin{equation}
+	\nabla\times\nabla\times\bm{A}=\nabla\times\bm{M}\,.
+\end{equation}
+Integration by parts of this equation results in a weak form reading: Find $\bm{A}\in H(\curl, \Omega_\mathrm{int.})$, such that
+\begin{equation}
+	\label{eqn:WeakFormA}
+	\left(\nabla\times\bm{A},\nabla\times\bm{A}'\right)_{\mathrlap{\Omega_\mathrm{int.}}\ \ }+\left\langle\bm{n}\times(\nabla\times\bm{A}),\bm{A}'\right\rangle_{\mathrlap{\p\Omega_\mathrm{int.}}\ \ }=\left(\nabla\times\bm{M},\bm{A}'\right)_{\Omega_\mathrm{int.}}
+\end{equation}
+holds for all $\bm{A}'\in H(\curl, \Omega_\mathrm{int.})$.
+
+Turning to the exterior, the weak form of the \textsc{Laplace} equation reads: Find $\vp\in H^1(\Omega_\mathrm{ext.})$, such that
+\begin{equation}
+	\left(\nabla\vp,\nabla\vp'\right)_{\mathrlap{\Omega_\mathrm{ext.}}\ \ }
+	-\left\langle\tilde{\bm{n}}\cdot\nabla\vp,\vp'\right\rangle_{\p\Omega_\mathrm{ext.}}=0\,.
+\end{equation}
+holds for all$\vp'\in H^1(\Omega_\mathrm{ext.})$.
+
+The boundary integral in the equation above can be decomposed into two part. One part is the boundary~$\varGamma=\varOmega_\mathrm{int.}\cap\varOmega_\mathrm{ext.}$ shared between the interior and exterior domain. The other part~$\varGamma_\infty$ represents the exterior enclosure of the domain~$\varOmega_\mathrm{ext.}$. On the boundary~$\varGamma$ the normal vector of both domains are opposed to one another, \ie $\tilde{\bm{n}}=-\bm{n}$, where $\tilde{\bm{n}}$ is the outward normal of $\varOmega_\mathrm{ext.}$. Taking the homogeneous \textsc{Dirichlet} boundary condition on $\varGamma_\infty$ into account the weak form of the \textsc{Laplace} equation reads: Find $\vp\in H^1(\Omega_\mathrm{ext.})$, such that
+\begin{equation}
+	\label{eqn:WeakFormPhi}
+	\left(\nabla\vp,\nabla\vp'\right)_{\mathrlap{\Omega_\mathrm{ext.}}\ \ }
+	+\left\langle\bm{n}\cdot\nabla\vp,\vp'\right\rangle_{\varGamma}=0\,.
+\end{equation}
+holds for all$\vp'\in H^1(\Omega_\mathrm{ext.})$.
+
+Next, the boundary terms are coupled using the transition conditions. Equation\,\eqref{eqn:JumpCondition}\textsubscript{2} allows to relate both potentials to each other:
+\begin{multline}
+	\bm{n}\times\jump{\bm{H}}=\bm{n}\times\jump{\bm{M}}\quad \Leftrightarrow \quad \bm{n}\times\bm{H}_\mathrm{int.}=\bm{n}\times\bm{H}_\mathrm{ext.}-\bm{n}\times\jump{\bm{M}}\\
+	\Leftrightarrow \quad \bm{n}\times(\nabla\times\bm{A})=\bm{n}\times\nabla\vp+\bm{n}\times\jump{\bm{M}}\,.
+\end{multline}
+Integrating by parts Integration, \cite[58\psq]{Monk2003}, the boundary term in Eq.\,\eqref{eqn:WeakFormA} can be transformed as follows:
+\begin{multline}
+	\left\langle\bm{n}\times(\nabla\times\bm{A}),\bm{A}'\right\rangle_{\varGamma}
+	=\left\langle\bm{n}\times\nabla\vp,\bm{A}'\right\rangle_{\varGamma}+\left\langle\bm{n}\times\jump{\bm{M}},\bm{A}'\right\rangle_{\varGamma}\\
+	=\left\langle\vp,\bm{n}\cdot\nabla\times\bm{A}'\right\rangle_{\varGamma}+\left\langle\bm{n}\times\jump{\bm{M}},\bm{A}'\right\rangle_{\varGamma}\,.
+\end{multline}
+Because of $\bm{n}\cdot\jump{\bm{B}}=0$ the boundary in Eq.\,\eqref{eqn:WeakFormPhi} can be directly written as:
+\begin{equation}
+	\label{eqn:RandPhi}
+	\left\langle\bm{n}\cdot\nabla\vp,\vp'\right\rangle_{\varGamma}=\left\langle\bm{n}\cdot\nabla\times\bm{A},\vp'\right\rangle_{\varGamma}\,.
+\end{equation}
+Hence, a \emph{symmetric coupling} results and the weak form reads: 
+%\begin{framed}
+Find $\vp\in H^1(\Omega_\mathrm{ext.})$ and $\bm{A}\in H(\curl, \Omega_\mathrm{int.})$, such that
+\begin{subequations}
+\label{eqn:WeakFormFinal}
+\begin{gather}
+	\left(\nabla\times\bm{A},\nabla\times\bm{A}'\right)_{\mathrlap{\Omega_\mathrm{int.}}\ \ }+\left\langle\vp,\bm{n}\cdot\nabla\times\bm{A}'\right\rangle_{\varGamma}
+	=\left(\nabla\times\bm{M},\bm{A}'\right)_{\mathrlap{\Omega_\mathrm{int.}}\ \ }-\left\langle\bm{n}\times\jump{\bm{M}},\bm{A}'\right\rangle_{\varGamma}\,,\\
+	\left(\nabla\vp,\nabla\vp'\right)_{\mathrlap{\Omega_\mathrm{ext.}}\ \ }+\left\langle\bm{n}\cdot\nabla\times\bm{A},\vp'\right\rangle_{\varGamma}=0\,.
+\end{gather}
+\end{subequations}
+holds for all $\vp'\in H^1(\Omega_\mathrm{ext.})$ and $\bm{A}'\in H(\curl, \Omega_\mathrm{int.})$.
