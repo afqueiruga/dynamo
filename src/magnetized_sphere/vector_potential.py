@@ -16,7 +16,7 @@ extVolId = 2
 intrfcId = 1
 bndryId = 2
 # import initial mesh
-mesh_name = "./sphereInCube"
+mesh_name = "../../meshes/sphereInCube"
 mesh = dlfn.Mesh(mesh_name + ".xml" )
 dim = mesh.geometry().dim()
 # facet and cell id markers
