@@ -1,5 +1,6 @@
 import dolfin as dlfn
 from afqsfenicsutil.my_restriction_map  import *
+from exact_solutions import *
 from mesh_function_transfer import transferMeshFunToSubMesh
 # wrapper for csr-matrix
 def getScipySparseMatrix(mat):
@@ -42,10 +43,10 @@ subMeshes = {intId: dlfn.SubMesh(mesh, cellMeshFun, intId),
              extId: dlfn.SubMesh(mesh, cellMeshFun, extId)}
 # transfer mesh functions
 facetSubMeshFuns = dict()
+cellSubMeshFuns = dict()
 for i in subIds:
     facetSubMeshFuns[i] = transferMeshFunToSubMesh(subMeshes[i], facetMeshFun)
-    pvd_file = dlfn.File("factfun-{}.pvd".format(i))
-    pvd_file << facetSubMeshFuns[i]
+    cellSubMeshFuns[i] = transferMeshFunToSubMesh(subMeshes[i], cellMeshFun)
 #------------------------------------------------------------------------------#
 # function spaces, test/trial functions, ...
 #------------------------------------------------------------------------------#
@@ -174,8 +175,8 @@ x_ext = x[m+n:]
 #------------------------------------------------------------------------------#
 sol_int = dlfn.Function(intHCurl)
 sol_int.vector()[:] = x_int
-sol_ext = dlfn.Function(extH1)
-sol_ext.vector()[:] = x_ext
+sol_phi = dlfn.Function(extH1)
+sol_phi.vector()[:] = x_ext
 #------------------------------------------------------------------------------#
 # output element solutions
 #------------------------------------------------------------------------------#
@@ -185,11 +186,35 @@ P1Grad = dlfn.VectorElement("DG", mesh.ufl_cell(), 0)
 extH1Grad= dlfn.FunctionSpace(subMeshes[extId], P1Grad)
 intH1Grad= dlfn.FunctionSpace(subMeshes[intId], P1Grad)
 # gradient projection
-grad_sol_ext = dlfn.project(grad(sol_ext), extH1Grad)
+grad_sol_ext = dlfn.project(grad(sol_phi), extH1Grad)
 # curl projection
-curl_sol_int = dlfn.project(curl(sol_A), intH1Grad)
+curl_A = dlfn.project(curl(sol_A), intH1Grad)
 # write output
 dlfn.File("solution-A.pvd") << sol_int
-dlfn.File("solution-curlA.pvd") << curl_sol_int
-dlfn.File("solution-phi.pvd") << sol_ext
+dlfn.File("solution-curlA.pvd") << curl_A
+dlfn.File("solution-phi.pvd") << sol_phi
 dlfn.File("solution-gradphi.pvd") << grad_sol_ext
+#------------------------------------------------------------------------------#
+# compute error
+#------------------------------------------------------------------------------#
+exact_field = ExactMagneticField(element = intH1Grad.ufl_element(),
+                                 cell_data = cellSubMeshFuns[intId],
+                                 interior_id = intId,
+                                 exterior_id = extId)
+exact_vector_pot= ExactVectorPotential(element = intH1Grad.ufl_element(),
+                                       cell_data = cellSubMeshFuns[intId],
+                                       interior_id = intId,
+                                       exterior_id = extId)
+exact_scalar_pot = ExactScalarPotential(element = extH1.ufl_element(),
+                                        cell_data = cellSubMeshFuns[extId],
+                                        interior_id = intId,
+                                        exterior_id = extId)
+exactH = dlfn.project(exact_field, intH1Grad)
+exactA = dlfn.project(exact_vector_pot, intHCurl)
+exactPhi = dlfn.project(exact_scalar_pot, extH1)
+l2_error = (dlfn.errornorm(sol_A, exactA, degree_rise=0),
+            dlfn.errornorm(curl_A, exactH, degree_rise=0),
+            dlfn.errornorm(sol_phi, exactPhi, degree_rise=0))
+h1curl_error = dlfn.errornorm(sol_A, exactA, degree_rise=0, norm_type="Hcurl")
+print l2_error
+print h1curl_error
