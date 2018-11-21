@@ -10,12 +10,12 @@ class ExactMagneticField(dlfn.Expression):
         assert isinstance(kwargs["exterior_id"], int)
         self._interior_id = kwargs["interior_id"]
         self._exterior_id = kwargs["exterior_id"]
-        self._dim = self._cell_data.mesh().topology().dim()
-        if self._dim != 3:
+        dim = self._cell_data.mesh().topology().dim()
+        if dim != 3:
             raise NotImplementedError()
 
     def value_shape(self):
-        return (self._dim,)
+        return (3,)
 
     def eval_cell(self, value, x, ufl_cell):
         r = np.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
@@ -40,13 +40,9 @@ class ExactScalarPotential(dlfn.Expression):
         assert isinstance(kwargs["exterior_id"], int)
         self._interior_id = kwargs["interior_id"]
         self._exterior_id = kwargs["exterior_id"]
-        self._dim = self._cell_data.mesh().topology().dim()
-        if self._dim != 3:
+        dim = self._cell_data.mesh().topology().dim()
+        if dim != 3:
             raise NotImplementedError()
-
-        self._r = lambda x: np.linalg.norm(x)
-        self._theta = lambda x: np.arccos(x[2] / self._r(x)) if self._r(x) > 1e-12 else np.pi/2.
-        self._phi = lambda x: np.arctan2(x[1], x[0])
 
     def eval_cell(self, value, x, ufl_cell):
         r = np.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
@@ -67,12 +63,12 @@ class ExactVectorPotential(dlfn.Expression):
         assert isinstance(kwargs["exterior_id"], int)
         self._interior_id = kwargs["interior_id"]
         self._exterior_id = kwargs["exterior_id"]
-        self._dim = self._cell_data.mesh().topology().dim()
-        if self._dim != 3:
+        dim = self._cell_data.mesh().topology().dim()
+        if dim != 3:
             raise NotImplementedError()
 
     def value_shape(self):
-        return (self._dim,)
+        return (3,)
 
     def eval_cell(self, value, x, ufl_cell):
         # assign value depending on domain
