@@ -226,6 +226,13 @@ step = 0
 time = 0.0
 # write initial condition
 dlfn.File("initial-A.pvd") << (sol_A0, time)
+# preconditioner
+def jacobi_preconditioning(v):
+    return v / system_matrix.diagonal()
+from scipy.sparse.linalg import LinearOperator
+P = LinearOperator(shape=system_matrix.shape,
+                   dtype=system_matrix.dtype,
+                   matvec=jacobi_preconditioning)
 while time < t_end and step < n_steps:
     print "Iteration: {:08d}, ".format(step), "time = {0:10.5f},".format(time),\
             " time step = {0:5.4e}".format(dt)
@@ -234,8 +241,12 @@ while time < t_end and step < n_steps:
     # scipy right-hand side vector
     b = np.hstack((rhs_int, np.zeros((n,))))
     # solve linear system
-    from scipy.sparse.linalg import spsolve
-    x = spsolve(system_matrix, b)
+    from scipy.sparse.linalg import gmres
+    x, info = gmres(system_matrix, b,
+                    tol=1e-6 * np.linalg.norm(b),
+                    maxiter=100,
+                    M=P)
+    assert info == 0
     x_int = x[:m]
     x_ext = x[m:]
     # assign solutions
