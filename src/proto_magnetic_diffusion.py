@@ -30,7 +30,7 @@ subIds = [intId, extId]
 #------------------------------------------------------------------------------#
 eta = 1.0
 dt = 1e-3
-n_steps = 10
+n_steps = 1000
 t_end = 1.0
 #------------------------------------------------------------------------------#
 # import initial mesh
@@ -82,6 +82,8 @@ for i in subIds:
     dA[i] = dlfn.Measure("ds", subMeshes[i], subdomain_data=facetSubMeshFuns[i])
     dV[i] = dlfn.Measure("dx", subMeshes[i])
     normals[i] = dlfn.FacetNormal(subMeshes[i])
+intV =  dlfn.assemble(dlfn.Constant(1.0) * dV[intId])
+extV =  dlfn.assemble(dlfn.Constant(1.0) * dV[extId])
 #------------------------------------------------------------------------------#
 # solution functions
 #------------------------------------------------------------------------------#
@@ -215,10 +217,10 @@ P1Grad = dlfn.VectorElement("DG", mesh.ufl_cell(), 0)
 extH1Grad= dlfn.FunctionSpace(subMeshes[extId], P1Grad)
 intH1Grad= dlfn.FunctionSpace(subMeshes[intId], P1Grad)
 # output files
-pvd_A = dlfn.File("solution-A.pvd")
-pvd_curlA = dlfn.File("solution-curlA.pvd")
-pvd_phi = dlfn.File("solution-phi.pvd")
-pvd_gradphi = dlfn.File("solution-gradphi.pvd")
+pvd_A = dlfn.File("./pvd/solution-A.pvd")
+pvd_curlA = dlfn.File("./pvd/solution-curlA.pvd")
+pvd_phi = dlfn.File("./pvd/solution-phi.pvd")
+pvd_gradphi = dlfn.File("./pvd/solution-gradphi.pvd")
 #------------------------------------------------------------------------------#
 # time loop
 #------------------------------------------------------------------------------#
@@ -233,6 +235,8 @@ from scipy.sparse.linalg import LinearOperator
 P = LinearOperator(shape=system_matrix.shape,
                    dtype=system_matrix.dtype,
                    matvec=jacobi_preconditioning)
+# allocation                   
+rms_values = np.zeros((n_steps + 1, 4))
 while time < t_end and step < n_steps:
     print "Iteration: {:08d}, ".format(step), "time = {0:10.5f},".format(time),\
             " time step = {0:5.4e}".format(dt)
@@ -243,7 +247,7 @@ while time < t_end and step < n_steps:
     # solve linear system
     from scipy.sparse.linalg import gmres
     x, info = gmres(system_matrix, b,
-                    tol=1e-6 * np.linalg.norm(b),
+                    tol=1e-9 * np.linalg.norm(b),
                     maxiter=100,
                     M=P)
     assert info == 0
@@ -264,5 +268,21 @@ while time < t_end and step < n_steps:
     pvd_curlA << (curl_A, time)
     pvd_phi << (sol_phi, time)
     pvd_gradphi << (grad_phi, time)
+    # rms-values
+    from math import sqrt
+    rms_A = sqrt( dlfn.assemble(dot(sol_A, sol_A) * dV[intId]) / intV )
+    rms_curlA = sqrt( dlfn.assemble(dot(curl_A, curl_A) * dV[intId]) / intV)
+    rms_phi = sqrt( dlfn.assemble(sol_phi * sol_phi * dV[extId]) / extV)
+    rms_gradphi = sqrt( dlfn.assemble(dot(grad_phi, grad_phi) * dV[extId]) / extV)
+    print "rms_values (A, phi, curl(A), grad(phi)): " +\
+        "{0:3.2e}, {1:3.2e}, {2:3.2e}, {3:3.2e}".format(rms_A, rms_phi, rms_curlA, rms_gradphi)
+    rms_values[step,:] = np.array([rms_A, rms_phi, rms_curlA, rms_gradphi])
     # update solutions for next iteration
     sol_A0.assign(sol_A)
+# plotting
+rms_values = rms_values[:step-1,:]
+import matplotlib.pyplot as plt
+fig, ax = plt.subplots(nrows=4, sharex=True)
+for i in range(4):
+    ax[i].plot(rms_values[:,i])
+plt.savefig("rms-values.pdf")
