@@ -109,7 +109,7 @@ matB = dlfn.assemble(b_int)
 # weak forms and assembly in exterior
 #------------------------------------------------------------------------------#
 # linear forms in exterior domain
-a_ext = inner(grad(phi), grad(psi)) * dV[extId]
+a_ext = inner(dlfn.Constant(eta) * grad(phi), grad(psi)) * dV[extId]
 # apply boundary condition
 bc = dlfn.DirichletBC(extH1, dlfn.Constant(0.),
                       facetSubMeshFuns[extId], bndryId)
@@ -165,13 +165,21 @@ spA = getScipySparseMatrix(matA)
 spC = getScipySparseMatrix(matC)
 spM = getScipySparseMatrix(matM)
 # block system
-from scipy.sparse import bmat
-K = bmat(((spA, spB),
-          (spB.transpose(), spC)))
-M = bmat(((spM, None),
-          (None, csr_matrix((n,n), dtype=np.float) )
-          ))
-system_matrix = M + K
+from block_operators import BlockLinearOperator
+system_matrix = BlockLinearOperator(2, 2)
+system_matrix[0,0] = spA + spM
+system_matrix[0,1] = spB
+system_matrix[1,0] = spB.transpose()
+system_matrix[1,1] = spC
+#------------------------------------------------------------------------------#
+# initial conditions
+#------------------------------------------------------------------------------#
+from scipy.sparse.linalg import spilu, LinearOperator
+spiluA = spilu(spA + spM)
+spiluC = spilu(spC)
+preconditioner = BlockLinearOperator(2, 2)
+preconditioner[0,0] = LinearOperator(spiluA.shape, matvec= lambda x: spiluA.solve(x))
+preconditioner[1,1] = LinearOperator(spiluC.shape, matvec= lambda x: spiluC.solve(x))
 #------------------------------------------------------------------------------#
 # initial conditions
 #------------------------------------------------------------------------------#
@@ -228,15 +236,9 @@ step = 0
 time = 0.0
 # write initial condition
 dlfn.File("initial-A.pvd") << (sol_A0, time)
-# preconditioner
-def jacobi_preconditioning(v):
-    return v / system_matrix.diagonal()
-from scipy.sparse.linalg import LinearOperator
-P = LinearOperator(shape=system_matrix.shape,
-                   dtype=system_matrix.dtype,
-                   matvec=jacobi_preconditioning)
 # allocation                   
 rms_values = np.zeros((n_steps + 1, 4))
+# time loop
 while time < t_end and step < n_steps:
     print "Iteration: {:08d}, ".format(step), "time = {0:10.5f},".format(time),\
             " time step = {0:5.4e}".format(dt)
@@ -249,7 +251,7 @@ while time < t_end and step < n_steps:
     x, info = gmres(system_matrix, b,
                     tol=1e-9 * np.linalg.norm(b),
                     maxiter=100,
-                    M=P)
+                    M=preconditioner)
     assert info == 0
     x_int = x[:m]
     x_ext = x[m:]
